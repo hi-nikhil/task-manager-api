@@ -1,8 +1,9 @@
 const sgMail=require('@sendgrid/mail')
 
-
+//api key given by 'SendGrid'
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
+//function is to send email when a new user is login
 const sendWelcomeEmail=(email,name) =>{
     sgMail.send({
         to:email,
@@ -13,6 +14,8 @@ const sendWelcomeEmail=(email,name) =>{
     })
 }
 
+
+//function to send email when a user is logout
 const sendCancelEmail=(email,name) =>{
     sgMail.send({
         to:email,

@@ -5,6 +5,8 @@ const Task=require('../models/task')
 
 
 router.post('/tasks',auth, async (req,res) =>{
+    //set the user data along with the task
+    //we store the id of the user in 'owner'
     const task=new Task({
         ...req.body,
         owner:req.user._id
@@ -18,18 +20,24 @@ router.post('/tasks',auth, async (req,res) =>{
     }
  })
 
-//GET /tasks?completed=true
-//GET /tasks?limit=10&skip=20
-//GET /tasks?sortBy=createdAt_asc/desc
+//GET /tasks?completed=true (Get the tasks which is completed)
+//GET /tasks?limit=10&skip=20 (Get the 10 tasks only and skip first 20 tasks)
+//GET /tasks?sortBy=createdAt_asc/desc  (Get the tasks in ascending or descending form)
  router.get('/tasks',auth, async (req,res) =>{
      const match={}
       const sort={}
+      //If query 'completed' is given then we only send task 
+      //which 'completed' value is equal to query 
+      //otherwise we send all tasks
      if(req.query.completed){
            match.completed=req.query.completed=== 'true'
      }
 
+     //If sortBy is provided 
      if(req.query.sortBy){
+         //parts =[createdAt , desc/asc]
          const parts=req.query.sortBy.split(':')
+         //if desc the value of createdAt=-1 else 1
          sort[parts[0]] =parts[1] == 'desc' ? -1:1
      }
 
@@ -38,8 +46,13 @@ router.post('/tasks',auth, async (req,res) =>{
            path:'tasks',
            match,
            options:{
+               //Change the value to int and then use it 
+               //limit the number of tasks fetched
                limit:parseInt(req.query.limit),
+               //skip the given number of tasks
                skip:parseInt(req.query.skip),
+               //sort that is defined above
+               //similar to (createdAt:-1/1)
                sort
            }
        }).execPopulate()
@@ -52,7 +65,8 @@ router.post('/tasks',auth, async (req,res) =>{
 router.get('/tasks/:id',auth,async (req,res) =>{
     const _id=req.params.id
     try{
-       
+       //Fetching the task of a particular User
+       //The User that is logged in 
        const task=await Task.findOne({_id,owner:req.user._id})
 
        if(!task){
